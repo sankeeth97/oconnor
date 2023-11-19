@@ -1,0 +1,247 @@
+data <- read.csv("05_08_2023_1.csv", header=TRUE)
+data <- read.csv("201672957.csv", header=TRUE)
+
+data <- read.csv("05_08_2023_sampling.csv", header=TRUE)
+
+data <- read.csv("05_08_2023_sampling3.csv", header=TRUE)
+
+data1 <- data
+
+
+# Function to recode Likert scale values to numerical values
+likert_to_numerical <- function(x) {
+  recode(x,
+         "Very Frequently" = 5,
+         "Frequently" = 4,
+         "Regularly" = 3,
+         "Occasionally" = 2,
+         "Never or Almost Never" = 1)
+}
+
+
+# Apply the function to all columns using mutate_all
+data1[1:7] <- data1[1:7] %>% mutate_all(likert_to_numerical)
+
+
+#----------------------------------------------------------------------------------------------------
+
+library(dplyr)
+
+# Function to recode Likert scale values to numerical values
+likert_to_numerical <- function(x) {
+  recode(x,
+         "Strongly disagree" = 1,
+         "Disagree" = 2,
+         "Somewhat disagree" = 3,
+         "Neither agree nor disagree" = 4,
+         "Somewhat agree" = 5,
+         "Agree" = 6,
+         "Strongly agree" = 7)
+}
+
+
+# Apply the function to all columns using mutate_all
+data1[8:39] <- data1[8:39] %>% mutate_all(likert_to_numerical)
+
+#-------------------------------------------------------------------------------------------------------
+
+data2 <- data1
+
+# Function to multiply all rows of a dataframe by 1/5
+multiply_by_one_fifth <- function(df) {
+  df * (1/5)
+}
+
+# Call the custom function to multiply the dataframe by 1/5
+data1[1:7] <- multiply_by_one_fifth(data1[1:7])
+#print(result_df)
+
+# Function to multiply all rows of a dataframe by 1/5
+multiply_by_one_seventh <- function(df) {
+  df * (1/7)
+}
+
+# Call the custom function to multiply the dataframe by 1/7
+data1[8:39] <- multiply_by_one_seventh(data1[8:39])
+#print(result_df)
+
+summary(data1)
+
+#-------------------------------------------------------------------------------------------------------
+library(lavaan)
+install.packages('lavaan')
+
+data1$MH5 <- NULL
+data1$MH4 <- NULL
+#data1$FT1 <- NULL
+#data1$FT2 <- NULL
+#data1$FT3 <- NULL
+data1$Others <- NULL
+
+m6a <- '
+# measurement model
+PE =~ PE1 + PE2 + PE3
+EE =~ EE1 + EE2 + EE3
+PV =~ PV1 + PV2 + PV3
+PF =~ PF1 + PF2 + PF3
+SI =~ SI1 + SI2
+SL =~ SL1 + SL2
+PG =~ PG1 + PG2 + PG3 + MH1 + MH2 + MH3
+VM =~ VM1 + VM2 + VM3
+
+# regressions
+Spotify.Premium ~ PE + EE + PV + PF + SI + SL + PG + VM
+'
+
+fit6a <- sem(m6a, data=data1)
+summary(fit6a, standardized=TRUE, fit.measures=TRUE)
+modindices(fit6a,sort=TRUE)
+
+lavInspect(fit6a, "cov.lv")
+
+m1a <- lm(Spotify.Premium ~ PE1 + PE2 + PE4 + PE5 + EE1 + EE3 + PV1 + PV2 + PV3 + PF1 + PF2 + PF3 +  
+            SI1 + SI2 + SL1 + SL2 + PG1 + PG2 + PG3 + MH1 + MH2 + MH3 + MH4 
+          + VM1 + VM2, data=data1)
+
+summary(m1a)
+
+m6b <- '
+# measurement model
+PE =~ PE1 + PE2 + PE3 + PE4 + PE5
+EE =~ EE1 + EE2 + EE3
+PV =~ PV1 + PV2 + PV3
+PF =~ PF1 + PF2 + PF3
+SI =~ SI1 + SI2
+SL =~ SL1 + SL2
+PG =~ PG1 + PG2 + PG3 + MH1 + MH2 + MH3
+VM =~ VM1 + VM2 + VM3
+PR2 =~ Spotify.Free + YouTube.Free
+
+# regressions
+PR2 ~ PE + EE + PV + PF + SI2 + SL + PG + VM
+'
+
+fit6b <- sem(m6b, data=data1)
+summary(fit6b, standardized=TRUE, fit.measures=TRUE)
+modindices(fit6b,sort=TRUE)
+
+
+m6c <- '
+# measurement model
+PE =~ PE1 + PE2 + PE3 + PE4 + PE5
+EE =~ EE1 + EE2 + EE3
+PV =~ PV1 + PV2 + PV3
+PF =~ PF1 + PF2 + PF3
+SI =~ SI1 + SI2
+SL =~ SL1 + SL2
+PG =~ PG1 + PG2 + PG3 + MH1 + MH2 + MH3
+VM =~ VM1 + VM2 + VM3
+
+# regressions
+YouTube.Premium ~ PE + EE + PV + PF + SI + SL + PG + VM
+'
+
+fit6c <- sem(m6c, data=data1)
+summary(fit6c, standardized=TRUE, fit.measures=TRUE)
+modindices(fit6c,sort=TRUE)
+
+
+m6d <- '
+# measurement model
+PE =~ PE1 + PE2 + PE3 + PE4 + PE5
+EE =~ EE1 + EE2 + EE3
+PV =~ PV1 + PV2 + PV3
+PF =~ PF1 + PF2 + PF3
+SI =~ SI1 + SI2
+SL =~ SL1 + SL2
+PG =~ PG1 + PG2 + PG3 + MH1 + MH2 + MH3
+VM =~ VM1 + VM2 + VM3
+
+# regressions
+Apple.Music ~ PE + EE + PV + PF + SI + SL + PG + VM
+'
+
+fit6d <- sem(m6d, data=data1)
+summary(fit6d, standardized=TRUE, fit.measures=TRUE)
+modindices(fit6d,sort=TRUE)
+
+
+
+m6e <- '
+# measurement model
+PE =~ PE1 + PE2 + PE3 + PE4 + PE5
+EE =~ EE1 + EE2 + EE3
+PV =~ PV1 + PV2 + PV3
+PF =~ PF1 + PF2 + PF3
+SI =~ SI1 + SI2
+SL =~ SL1 + SL2
+PG =~ PG1 + PG2 + PG3 + MH1 + MH2 + MH3
+VM =~ VM1 + VM2 + VM3
+
+# regressions
+Amazon.Music ~ PE + EE + PV + PF + SI + SL + PG + VM
+'
+
+fit6e <- sem(m6e, data=data1)
+summary(fit6e, standardized=TRUE, fit.measures=TRUE)
+modindices(fit6e,sort=TRUE)
+
+
+
+
+data1$YouTube.Premium
+
+
+#----------------------------Exogenous factor analysis (Model 5A)--------------------------------
+
+m5a <- 'PE =~ PE1 + PE2 + PE4 + PE5
+#intercepts (nu = tau) 
+PE1 ~ 1
+PE2 ~ 1 
+PE4 ~ 1
+PE5 ~ 1
+'
+
+fit5a <- sem(m5a, data=data1)
+summary(fit5a, standardized=TRUE)
+
+
+
+#one factor three items, default marker method
+m1a  <- 'PE =~ PE1 + PE2 + PE4 + PE5'
+onefac3items_a <- cfa(m1a, data=data1) 
+summary(onefac3items_a) 
+
+
+#one factor three items, variance std 
+m1b  <- 'PE =~ NA*PE1 + PE2 + PE4 + PE5 
+          PE ~~ 1*PE' 
+onefac3items_b <- cfa(m1b, data=data1) 
+summary(onefac3items_b, standardized=TRUE)
+
+#------------------------------------------------------------------------------------------------------
+
+data_sp_p <- subset(data1, Spotify.Premium > 0)
+data_sp_p[2:6] <- NULL
+
+m6m <- '
+# measurement model
+PE =~ PE1 + PE2 + PE4 + PE5
+EE =~ EE1 + EE3
+PV =~ PV1 + PV2 + PV3
+PF =~ PF1 + PF2 + PF3
+SI =~ SI1 + SI2
+SL =~ SL1 + SL2
+PG =~ PG1 + PG2 + PG3 + MH1 + MH2 + MH3 + MH4
+VM =~ VM1 + VM2
+PR1 =~ Spotify.Premium
+
+# regressions
+PR1 ~ PE + EE + PV + PF + SI + SL + PG + VM 
+'
+
+fit6m <- sem(m6m, data=data_sp_p)
+summary(fit6m, standardized=TRUE, fit.measures=TRUE)
+
+#------------------------------------------------------------------------------------------------------
+
